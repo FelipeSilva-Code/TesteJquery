@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Teste JQuery</title>
+    <link href="styled.css" rel="stylesheet">
+    <link href="../../global.css" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h3>Procura de CEP</h3>
+    </header>
+
+   <div class="container">
+        <div class="box">
+            <h3>Consultar</h3>
+
+            <div class="box-inputs">
+                <label>
+                    CEP:
+                    <input id="cep" class="form-control"/>
+                </label>
+                
+                <label>
+                    Rua:
+                    <input id="rua" readonly class="form-control"/>
+                </label>
+                
+                 <label>
+                    Bairro:
+                    <input id="bairro" readonly class="form-control"/>
+                </label>
+
+                <label>
+                    Cidade:
+                    <input id="cidade" readonly class="form-control"/>
+                </label>
+            
+                
+                <label>
+                   Estado:
+                    <input id="estado" readonly class="form-control"/>
+                </label>
+
+            </div>
+
+            <div>
+                <button id="btnProcurar" class="btn btn-light">
+                    Procurar
+                </button>
+
+                 <button id="btnLimpar" class="btn btn-danger">
+                    Limpar
+                </button>
+            </div>
+
+        </div>
+   </div>
+
+   <footer>
+       <p>Todos os direitos reservados a Conceição, Felipe</p>
+   </footer>
+
+
+     <script src="../../node_modules//jquery/dist/jquery.js"></script>
+     
+     <script> 
+         //Executa o codigo após o documento estar pronto para manipulação
+         $( document ).ready(function() {
+             
+            //Procura pelo cep
+            $("#btnProcurar").click(function() {
+                
+                //Deixa o CEP somente com digitos.
+                var cep = $("#cep").val().replace(/\D/g, '');
+
+                if(cep.length != 8)
+                {
+                    swal('CEP inválido!')
+                    $("#cep").val("");
+                    $("#rua").val("");
+                    $("#bairro").val("");
+                    $("#cidade").val("");
+                    $("#estado").val("");
+                }
+
+                //para onde vai os dados gerados   
+                $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados){
+                   if(!("erro" in dados)){
+                        $("#rua").val(dados.logradouro);
+                        $("#bairro").val(dados.bairro);
+                        $("#cidade").val(dados.localidade);
+                        $("#estado").val(dados.uf)
+                   }
+                   else {
+                       //Não encontrou o CEP
+                        swal('CEP inválido!')
+                        $("#cep").val("");
+                        $("#rua").val("");
+                        $("#bairro").val("");
+                        $("#cidade").val("");
+                        $("#estado").val("");
+                   }
+                })
+             })
+
+
+             //Limpa os campos
+             $("#btnLimpar").click(function (){
+                    $("#cep").val("");
+                    $("#rua").val("");
+                    $("#bairro").val("");
+                    $("#cidade").val("");
+                    $("#estado").val("");
+             })
+            
+         });
+     </script>
+
+     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    
+    <script>
+         //Executa o codigo depois que todo o documento tenha sido carregado
+        //  window.onload = function() {
+        //      alert("Hello World")   
+        //  }
+     </script>
+
+     <script>
+         //Executa o codigo após o documento estar pronto para manipulação
+        //  $( document ).ready(function() {
+        //      $( "a" ).click(function( event ) {
+        //       alert( "Hello World!" ); 
+        //       event.preventDefault();
+        //       });
+        //  });
+     </script>
+</body>
+</html>

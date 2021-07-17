@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Dog API</title>
+    <link href="styled.css" rel="stylesheet">
+    <link href="../../global.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../circle-indicator-spinner/circle-indicator-spinner/dist/jquery-spinner.min.css" />
+
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <h1>Dog API</h1>
+    </header>
+
+    <div id="container" class="container">
+        <div>
+            <h3>Selecione uma raça</h3>
+
+            <div class="se-divPesquisar">
+                <select class="racas_sele form-control">
+                    <option></option>
+                </select>
+                <button id="pesquisar" class="btn btn-primary">Pesquisar</button>
+            </div>
+
+            <table class="table" id="breed_data_table">
+            </table>
+
+            <div class="spinner-border"></div>
+        </div>
+    </div>
+    
+    <footer>
+       <p>Todos os direitos reservados a Conceição, Felipe</p>
+    </footer>
+
+
+    <script src="../../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../../circle-indicator-spinner/circle-indicator-spinner/dist/jquery-spinner.min.js"></script>
+
+    
+
+    <script>
+
+        $(document).ready(function()
+        {
+            
+            var spinner = new jQuerySpinner({
+                parentId:'container'
+            });          
+
+            //Busca as raças
+            $.ajax({
+                headers: {"x-api-key": "88091d38-7177-4c63-96d8-39dc35df5c19"},
+                url: "https://api.thedogapi.com/v1/breeds",
+                dataType: 'json',
+                type: 'GET',
+                beforeSend:  spinner.show()
+            }).done(function(response){
+
+                spinner.hide();
+
+                //Passo o id da primeira raca, para a propriedade sempre ter algum valor
+                $id = response[0].id 
+                
+                //Preenche o select
+                preencherSelect(response)
+            })
+
+            function preencherSelect (racas) 
+            {
+                $racas_sele.empty().append(function(){
+                let novoOption = ''
+                   
+                    $.each(racas, function(key, value){
+                        novoOption += '<option id="' + value.id + '">' + value.name +  '</option>'
+                    });
+
+                    return novoOption;
+                }) 
+            }
+            
+            var $racas_sele = $('select.racas_sele');
+            
+            let $id = 0
+
+            //Pego o valor do id a cada mudança de option
+            $racas_sele.change(function() {
+                $id = $(this).children(":selected").attr("id");              
+            });
+
+
+            $("#pesquisar").click(function(){
+              pegarRacaPorId($id)
+            });
+
+            
+            function pegarRacaPorId(id)
+            {
+                $.ajax({
+                    headers: {"x-api-key": "88091d38-7177-4c63-96d8-39dc35df5c19"},
+                    url: "https://api.thedogapi.com/v1/images/search?include_breed=1&breed_id=" + id,
+                    dataType: 'json',
+                    type: 'GET',
+                    beforeSend:  spinner.show()
+                }).done(function(response){
+                    spinner.hide();
+                    exibirNaTela(response)
+            })}
+
+           
+            function exibirNaTela(cachorroPorId)
+            {  
+                let dados = cachorroPorId[0].breeds[0]
+
+                let tratado = novoJson(dados)
+                
+                //Limpa a tabela antes de inserir novamente
+                $("#breed_data_table tr").remove();
+
+                $.each(tratado, function(key, value){
+                    
+                    key = key.replaceAll("_", " ")
+                    $("#breed_data_table").append("<tr><td>" + key + "</td><td>" + value + "</td></tr>");
+                })
+            }
+
+            //Trata o objeto 
+            function novoJson(response)
+            {
+                let tratado = {
+                    "Nome": "",
+                    "Altura": 0,
+                    "Peso": 0,
+                    "Tempo_de_vida": "",
+                    "Temperamento": "",
+                    "Origem": ""
+                }
+
+                tratado.Nome = response.name;
+                tratado.Origem = response.origin ? response.origin : "-";
+                tratado.Tempo_de_vida = response.life_span;
+                tratado.Temperamento = response.temperament;
+                tratado.Peso = response.weight.metric + " kg"
+                tratado.Altura = response.height.metric + " cm"
+
+                return tratado;
+            }
+          
+        })  
+
+    </script>
+</body>
+</html>
